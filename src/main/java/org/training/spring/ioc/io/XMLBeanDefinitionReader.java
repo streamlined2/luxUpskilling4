@@ -1,9 +1,9 @@
 package org.training.spring.ioc.io;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,91 +18,96 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class XMLBeanDefinitionReader implements BeanDefinitionReader {
 
-    private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
+	private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
 
-    private List<String> contextFiles;
-    private List<BeanDefinition> beanDefinitions = new ArrayList<>();
+	private List<BeanDefinition> beanDefinitions;
+	private List<String> contextFiles;
 
-    public XMLBeanDefinitionReader(String... path) {
-        contextFiles = new ArrayList<>(Arrays.asList(path));
-    }
+	public XMLBeanDefinitionReader(String... path) {
+		contextFiles = new ArrayList<>(Arrays.asList(path));
+		beanDefinitions = new ArrayList<>();
+	}
 
-    @Override
-    public List<BeanDefinition> getBeanDefinitions() {
-        SAXParser saxParser;
+	@Override
+	public List<BeanDefinition> getBeanDefinitions() {
 		try {
-			saxParser = SAX_PARSER_FACTORY.newSAXParser();
-	        DefaultHandler beanDefinitionHandler = new BeanDefinitionHandler();
-	        for (String contextFile : contextFiles) {
-				saxParser.parse(contextFile, beanDefinitionHandler);
-	        }
+			SAXParser saxParser = SAX_PARSER_FACTORY.newSAXParser();
+			DefaultHandler beanDefinitionHandler = new BeanDefinitionHandler();
+			for (String contextFile : contextFiles) {
+				saxParser.parse(getClass().getResourceAsStream(contextFile), beanDefinitionHandler);
+			}
+			return beanDefinitions;
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new SourceParseException("Error parsing XML", e);
+			throw new SourceParseException("parsing failed", e);
 		}
-        return beanDefinitions;
-    }
+	}
 
-    class BeanDefinitionHandler extends DefaultHandler {
-        private static final String BEANS = "beans";
-        private static final String BEAN = "bean";
-        private static final String ID = "id";
-        private static final String CLASS = "class";
-        private static final String PROPERTY = "property";
-        private static final String NAME = "name";
-        private static final String VALUE = "value";
-        private static final String REF = "ref";
-        private boolean bbeans = false;
+	private class BeanDefinitionHandler extends DefaultHandler {
 
-        private BeanDefinition beanDefinition = new BeanDefinition();
+		private static final String BEANS = "beans";
+		private static final String BEAN = "bean";
+		private static final String ID = "id";
+		private static final String CLASS = "class";
+		private static final String PROPERTY = "property";
+		private static final String NAME = "name";
+		private static final String VALUE = "value";
+		private static final String REF = "ref";
 
-        @Override
-        public void startElement(String uri, String localName, String qName,
-                                 Attributes attributes) {
+		private boolean beansTagStarted = false;
 
-            if (qName.equalsIgnoreCase(BEANS)) {
-                bbeans = true;
-            }
+		private BeanDefinition beanDefinition;
 
-            if (qName.equalsIgnoreCase(BEAN)) {
-                beanDefinition.setId(attributes.getValue(ID));
-                beanDefinition.setBeanClassName(attributes.getValue(CLASS));
-            }
+		@Override
+		public void startElement(String uri, String localName, String qName, Attributes attributes) {
 
-            if (qName.equalsIgnoreCase(PROPERTY)) {
-                String name = attributes.getValue(NAME);
-                String value = attributes.getValue(VALUE);
-                String ref = attributes.getValue(REF);
-                if (ref != null) {
-                    if (beanDefinition.getRefDependencies() != null) {
-                        beanDefinition.getRefDependencies().put(name, ref);
-                    } else {
-                        beanDefinition.setRefDependencies(new HashMap<String, String>() {{
-                            put(name, ref);
-                        }});
-                    }
-                } else {
-                    if (beanDefinition.getDependencies() != null) {
-                        beanDefinition.getDependencies().put(name, value);
-                    } else {
-                        beanDefinition.setDependencies(new HashMap<String, String>() {{
-                            put(name, value);
-                        }});
-                    }
-                }
-            }
-        }
+			if (qName.equalsIgnoreCase(BEANS)) {
+				beansTagStarted = true;
+				return;
+			}
 
-        @Override
-        public void endElement(String uri, String localName,
-                               String qName) {
-            if (qName.equals(BEAN)) {
-                if (!bbeans) throw new SourceParseException("Root Element " + BEANS + " is not found");
-                beanDefinitions.add(beanDefinition);
-                beanDefinition = new BeanDefinition();
-            }
-        }
+			if (qName.equalsIgnoreCase(BEAN)) {
+				beanDefinition = BeanDefinition.builder().id(attributes.getValue(ID))
+						.className(attributes.getValue(CLASS)).build();
+				return;
+			}
 
-    }
+			if (qName.equalsIgnoreCase(PROPERTY)) {
+
+				if (beanDefinition == null) {
+					throw new SourceParseException(String.format("no start tag for %s encountered", BEAN));
+				}
+
+				String name = attributes.getValue(NAME);
+				if (name == null) {
+					throw new SourceParseException(String.format("no %s attribute found for %s tag", NAME, BEAN));
+				}
+
+				String value = attributes.getValue(VALUE);
+				String ref = attributes.getValue(REF);
+
+				if (ref == null) {
+					beanDefinition.getDependencies().put(name, value);
+				} else {
+					beanDefinition.getReferences().put(name, ref);
+				}
+			}
+
+		}
+
+		@Override
+		public void endElement(String uri, String localName, String qName) {
+
+			if (qName.equals(BEAN)) {
+
+				if (!beansTagStarted) {
+					throw new SourceParseException(String.format("start tag %s not found", BEANS));
+				}
+
+				beanDefinitions.add(beanDefinition);
+				beanDefinition = null;
+			}
+		}
+
+	}
 
 }
-

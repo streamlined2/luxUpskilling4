@@ -1,24 +1,17 @@
 package org.training.spring.ioc.entity;
 
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+@EqualsAndHashCode(of = "id")
 public class Bean {
 
 	private String id;
-    private Object value;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
+	private Object value;
 
 }

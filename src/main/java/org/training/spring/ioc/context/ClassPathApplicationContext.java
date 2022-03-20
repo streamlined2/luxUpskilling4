@@ -68,4 +68,5 @@ public class ClassPathApplicationContext implements ApplicationContext {
     private String getSetterName(String propertyName) {
         return SETTER_PREFIX + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
     }
+
 }

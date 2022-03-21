@@ -43,7 +43,7 @@ public class BeanDefinition {
 			} else if (o1.refDependencies.size() > o2.refDependencies.size()) {
 				return 1;
 			}
-			return 0;
+			return ID_CLASSNAME_COMPARATOR.compare(o1, o2);
 		}
 
 	}

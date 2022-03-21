@@ -1,5 +1,6 @@
 package org.training.spring.ioc.context.utilities;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -31,14 +32,25 @@ public class Inspector {
 	public static void setPropertyValue(Object obj, String propertyName, String value) {
 		String setterName = getSetterName(propertyName);
 		try {
-			Method setter = obj.getClass().getDeclaredMethod(setterName);
+			Class<?> parameterType = getPropertyType(obj, propertyName);
+			Method setter = obj.getClass().getDeclaredMethod(setterName, parameterType);
 			checkIfSetterValid(setter);
-			Class<?> parameterType = setter.getParameterTypes()[0];
-			setPrimitiveTypeValue(obj, setter, parameterType, value);
+			setValue(obj, setter, parameterType, value);
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new SetterInvocationException(
 					String.format("no such method %s in class %s", setterName, obj.getClass().getName()));
 		}
+	}
+
+	private static Class<?> getPropertyType(Object obj, String propertyName) {
+		try {
+			Field property = obj.getClass().getDeclaredField(propertyName);
+			return property.getType();
+		} catch (NoSuchFieldException e) {
+			throw new NoSetterFoundException(
+					String.format("can't find property %s in class %s", propertyName, obj.getClass().getName()));
+		}
+
 	}
 
 	private static void checkIfSetterValid(Method setter) {
@@ -49,40 +61,41 @@ public class Inspector {
 		}
 	}
 
-	private static void setPrimitiveTypeValue(Object obj, Method setter, Class<?> type, String value) {
+	private static void setValue(Object obj, Method setter, Class<?> type, String value) {
 		setter.setAccessible(true);
-		if (type.isPrimitive()) {
-			try {
-				if (type == boolean.class) {
-					setter.invoke(obj, Boolean.valueOf(value));
-				} else if (type == byte.class) {
-					setter.invoke(obj, Byte.valueOf(value));
-				} else if (type == short.class) {
-					setter.invoke(obj, Short.valueOf(value));
-				} else if (type == int.class) {
-					setter.invoke(obj, Integer.valueOf(value));
-				} else if (type == long.class) {
-					setter.invoke(obj, Long.valueOf(value));
-				} else if (type == float.class) {
-					setter.invoke(obj, Float.valueOf(value));
-				} else if (type == double.class) {
-					setter.invoke(obj, Double.valueOf(value));
-				} else if (type == char.class) {
-					setter.invoke(obj, Character.valueOf(value.charAt(0)));
-				}
-			} catch (InvocationTargetException | IllegalAccessException e) {
-				throw new SetterInvocationException(String.format("call to setter %s failed", setter.getName()));
+		try {
+			if (type == boolean.class) {
+				setter.invoke(obj, Boolean.valueOf(value));
+			} else if (type == byte.class) {
+				setter.invoke(obj, Byte.valueOf(value));
+			} else if (type == short.class) {
+				setter.invoke(obj, Short.valueOf(value));
+			} else if (type == int.class) {
+				setter.invoke(obj, Integer.valueOf(value));
+			} else if (type == long.class) {
+				setter.invoke(obj, Long.valueOf(value));
+			} else if (type == float.class) {
+				setter.invoke(obj, Float.valueOf(value));
+			} else if (type == double.class) {
+				setter.invoke(obj, Double.valueOf(value));
+			} else if (type == char.class) {
+				setter.invoke(obj, Character.valueOf(value.charAt(0)));
+			} else if (type == String.class) {
+				setter.invoke(obj, value);
+			} else {
+				throw new SetterInvocationException(
+						String.format("property %s of unknown type %s", setter.getName(), type.getName()));
 			}
-		} else {
-			throw new SetterInvocationException(
-					String.format("property %s must be of primitive type", setter.getName()));
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			throw new SetterInvocationException(String.format("call to setter %s failed", setter.getName()));
 		}
 	}
 
 	public static void setPropertyReference(Object obj, String propertyName, Object referencedBean) {
 		String setterName = getSetterName(propertyName);
 		try {
-			Method setter = obj.getClass().getDeclaredMethod(setterName);
+			Class<?> parameterType = getPropertyType(obj, propertyName);
+			Method setter = obj.getClass().getDeclaredMethod(setterName, parameterType);
 			checkIfSetterValid(setter);
 			setReference(obj, setter, referencedBean);
 		} catch (NoSuchMethodException | SecurityException e) {

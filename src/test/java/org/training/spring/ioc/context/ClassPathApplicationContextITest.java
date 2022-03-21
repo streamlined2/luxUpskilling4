@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
-import org.training.spring.ioc.io.XMLBeanDefinitionReader;
 import org.training.spring.ioc.service.MailService;
 import org.training.spring.ioc.service.PaymentService;
 import org.training.spring.ioc.service.UserService;

@@ -30,16 +30,15 @@ class ClassPathApplicationContextITest {
 	@DisplayName("application context instantiation")
 	void testApplicationContextInstantiation() {
 		var applicationContextSetReader = new ClassPathApplicationContext("/context.xml");
-		applicationContextSetReader.start();
-		Assertions.assertSame(applicationContext.getBean(UserService.class),
+		Assertions.assertEquals(applicationContext.getBean(UserService.class),
 				applicationContextSetReader.getBean(UserService.class));
 		Assertions.assertNotNull(applicationContext.getBean(UserService.class));
 		Assertions.assertNotNull(applicationContextSetReader.getBean(UserService.class));
-		Assertions.assertSame(applicationContext.getBean("mailService", MailService.class),
+		Assertions.assertEquals(applicationContext.getBean("mailService", MailService.class),
 				applicationContextSetReader.getBean("mailService", MailService.class));
 		Assertions.assertNotNull(applicationContext.getBean("mailService", MailService.class));
 		Assertions.assertNotNull(applicationContextSetReader.getBean("mailService", MailService.class));
-		Assertions.assertSame(applicationContext.getBean("paymentWithMaxService"),
+		Assertions.assertEquals((Object) applicationContext.getBean("paymentWithMaxService"),
 				applicationContextSetReader.getBean("paymentWithMaxService"));
 		Assertions.assertNotNull(applicationContext.getBean("paymentWithMaxService"));
 		Assertions.assertNotNull(applicationContextSetReader.getBean("paymentWithMaxService"));
@@ -48,8 +47,8 @@ class ClassPathApplicationContextITest {
 	@Test
 	@DisplayName("bean fetching by class succeeds")
 	void testGetBeanByClass() {
-		Assertions.assertSame(userService, applicationContext.getBean(UserService.class));
-		Assertions.assertSame(mailService, applicationContext.getBean(MailService.class));
+		Assertions.assertEquals(userService, applicationContext.getBean(UserService.class));
+		Assertions.assertEquals(mailService, applicationContext.getBean(MailService.class));
 	}
 
 	@Test
@@ -62,19 +61,20 @@ class ClassPathApplicationContextITest {
 	@Test
 	@DisplayName("bean fetching by name and class succeeds")
 	void testGetBeanByNameAndClass() {
-		Assertions.assertSame(userService, applicationContext.getBean("userService", UserService.class));
-		Assertions.assertSame(mailService, applicationContext.getBean("mailService", MailService.class));
-		Assertions.assertSame(paymentService, applicationContext.getBean("paymentService", PaymentService.class));
-		Assertions.assertSame(paymentServiceWithMaxAmount, applicationContext.getBean("paymentWithMaxService", PaymentService.class));
-    }
+		Assertions.assertEquals(userService, applicationContext.getBean("userService", UserService.class));
+		Assertions.assertEquals(mailService, applicationContext.getBean("mailService", MailService.class));
+		Assertions.assertEquals(paymentService, applicationContext.getBean("paymentService", PaymentService.class));
+		Assertions.assertEquals(paymentServiceWithMaxAmount,
+				applicationContext.getBean("paymentWithMaxService", PaymentService.class));
+	}
 
 	@Test
 	@DisplayName("bean fetching by name succeeds")
 	void testGetBeanByName() {
-		Assertions.assertSame(userService, applicationContext.getBean("userService"));
-		Assertions.assertSame(mailService, applicationContext.getBean("mailService"));
-		Assertions.assertSame(paymentService, applicationContext.getBean("paymentService"));
-		Assertions.assertSame(paymentServiceWithMaxAmount, applicationContext.getBean("paymentWithMaxService"));
-    }
+		Assertions.assertEquals(userService, applicationContext.getBean("userService"));
+		Assertions.assertEquals(mailService, applicationContext.getBean("mailService"));
+		Assertions.assertEquals(paymentService, applicationContext.getBean("paymentService"));
+		Assertions.assertEquals(paymentServiceWithMaxAmount, applicationContext.getBean("paymentWithMaxService"));
+	}
 
 }

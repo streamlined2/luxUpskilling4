@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.training.spring.ioc.context.utilities.Inspector;
+import org.training.spring.ioc.context.utility.Inspector;
 import org.training.spring.ioc.entity.Bean;
 import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
@@ -23,9 +23,10 @@ public class ClassPathApplicationContext implements ApplicationContext {
 
 	public ClassPathApplicationContext(String... path) {
 		setBeanDefinitionReader(new XMLBeanDefinitionReader(path));
+		start();
 	}
 
-	public void start() {
+	private void start() {
 		beans = new HashMap<>();
 		List<BeanDefinition> beanDefinitions = beanDefinitionReader.getBeanDefinitions();
 		instantiateAndConfigureBeans(beanDefinitions);

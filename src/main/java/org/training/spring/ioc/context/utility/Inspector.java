@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.utilities;
+package org.training.spring.ioc.context.utility;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

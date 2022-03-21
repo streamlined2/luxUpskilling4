@@ -1,7 +1,6 @@
 package org.training.spring.ioc.io;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -3,13 +3,15 @@ package org.training.spring.ioc.context;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.training.spring.ioc.context.utilities.Inspector;
 import org.training.spring.ioc.entity.Bean;
 import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
+import org.training.spring.ioc.exception.NoBeanInContextException;
 import org.training.spring.ioc.exception.NoClassForBeanException;
-import org.training.spring.ioc.exception.NoDefaultConstructorForBean;
 import org.training.spring.ioc.exception.NoSuitableBeanException;
 import org.training.spring.ioc.io.BeanDefinitionReader;
 import org.training.spring.ioc.io.XMLBeanDefinitionReader;
@@ -26,7 +28,7 @@ public class ClassPathApplicationContext implements ApplicationContext {
 	public void start() {
 		beans = new HashMap<>();
 		List<BeanDefinition> beanDefinitions = beanDefinitionReader.getBeanDefinitions();
-		instantiateBeans(beanDefinitions);
+		instantiateAndConfigureBeans(beanDefinitions);
 	}
 
 	@Override
@@ -78,8 +80,10 @@ public class ClassPathApplicationContext implements ApplicationContext {
 		this.beanDefinitionReader = beanDefinitionReader;
 	}
 
-	private void instantiateBeans(List<BeanDefinition> beanDefinitions) {
-		for (var beanDefinition : beanDefinitions) {
+	private void instantiateAndConfigureBeans(List<BeanDefinition> beanDefinitions) {
+		Set<BeanDefinition> sortedByReferenceCountDefinitions = new TreeSet<>(BeanDefinition.REFERENCE_COUNTER_COMPARATOR);
+		sortedByReferenceCountDefinitions.addAll(beanDefinitions);
+		for (var beanDefinition : sortedByReferenceCountDefinitions) {
 			String id = beanDefinition.getId();
 			try {
 				Class<?> cl = Class.forName(beanDefinition.getClassName());
@@ -105,8 +109,12 @@ public class ClassPathApplicationContext implements ApplicationContext {
 	private void setReferences(Object bean, BeanDefinition beanDefinition) {
 		for (var dependency : beanDefinition.getRefDependencies().entrySet()) {
 			String property = dependency.getKey();
-			String value = dependency.getValue();
-			Inspector.setPropertyValue(bean, property, value);
+			String referencedBeanName = dependency.getValue();
+			Object referencedBean = getBean(referencedBeanName);
+			if(referencedBean == null) {
+				throw new NoBeanInContextException(String.format("can't find bean %s in context", referencedBeanName));
+			}
+			Inspector.setPropertyReference(bean, property, referencedBean);
 		}
 	}
 

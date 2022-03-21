@@ -17,6 +17,7 @@ public class BeanDefinition {
 
 	public static final Comparator<BeanDefinition> ID_CLASSNAME_COMPARATOR = Comparator.comparing(BeanDefinition::getId)
 			.thenComparing(BeanDefinition::getClassName);
+	public static final Comparator<BeanDefinition> REFERENCE_COUNTER_COMPARATOR = new ReferenceCounterComparator();
 
 	private String id;
 	private String className;
@@ -31,6 +32,20 @@ public class BeanDefinition {
 	public BeanDefinition addRefDependency(String name, String value) {
 		refDependencies.put(name, value);
 		return this;
+	}
+
+	private static class ReferenceCounterComparator implements Comparator<BeanDefinition> {
+
+		@Override
+		public int compare(BeanDefinition o1, BeanDefinition o2) {
+			if (o1.refDependencies.size() < o2.refDependencies.size()) {
+				return -1;
+			} else if (o1.refDependencies.size() > o2.refDependencies.size()) {
+				return 1;
+			}
+			return 0;
+		}
+
 	}
 
 }

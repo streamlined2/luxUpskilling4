@@ -32,21 +32,24 @@ public class Inspector {
 		String setterName = getSetterName(propertyName);
 		try {
 			Method setter = obj.getClass().getDeclaredMethod(setterName);
-			Class<?>[] parameterTypes = setter.getParameterTypes();
-			if (parameterTypes.length != 1) {
-				throw new NoSetterFoundException(
-						String.format("number of parameters %d for setter method %s should be 1", parameterTypes.length,
-								setter.getName()));
-			}
-			Class<?> parameterType = parameterTypes[0];
-			setPrimitiveTypeProperty(obj, setter, parameterType, value);
+			checkIfSetterValid(setter);
+			Class<?> parameterType = setter.getParameterTypes()[0];
+			setPrimitiveTypeValue(obj, setter, parameterType, value);
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new SetterInvocationException(
 					String.format("no such method %s in class %s", setterName, obj.getClass().getName()));
 		}
 	}
 
-	private static void setPrimitiveTypeProperty(Object obj, Method setter, Class<?> type, String value) {
+	private static void checkIfSetterValid(Method setter) {
+		Class<?>[] parameterTypes = setter.getParameterTypes();
+		if (parameterTypes.length != 1) {
+			throw new NoSetterFoundException(String.format("number of parameters %d for setter method %s should be 1",
+					parameterTypes.length, setter.getName()));
+		}
+	}
+
+	private static void setPrimitiveTypeValue(Object obj, Method setter, Class<?> type, String value) {
 		setter.setAccessible(true);
 		if (type.isPrimitive()) {
 			try {
@@ -73,6 +76,26 @@ public class Inspector {
 		} else {
 			throw new SetterInvocationException(
 					String.format("property %s must be of primitive type", setter.getName()));
+		}
+	}
+
+	public static void setPropertyReference(Object obj, String propertyName, Object referencedBean) {
+		String setterName = getSetterName(propertyName);
+		try {
+			Method setter = obj.getClass().getDeclaredMethod(setterName);
+			checkIfSetterValid(setter);
+			setReference(obj, setter, referencedBean);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new SetterInvocationException(
+					String.format("no such method %s in class %s", setterName, obj.getClass().getName()));
+		}
+	}
+
+	private static void setReference(Object obj, Method setter, Object referencedBean) {
+		try {
+			setter.invoke(obj, referencedBean);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new SetterInvocationException(String.format("can't set reference via setter %s", setter.getName()));
 		}
 	}
 

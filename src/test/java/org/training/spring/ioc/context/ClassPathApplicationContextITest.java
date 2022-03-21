@@ -30,8 +30,7 @@ class ClassPathApplicationContextITest {
 	@Test
 	@DisplayName("application context instantiation")
 	void testApplicationContextInstantiation() {
-		var applicationContextSetReader = new ClassPathApplicationContext();
-		applicationContextSetReader.setBeanDefinitionReader(new XMLBeanDefinitionReader("/context.xml"));
+		var applicationContextSetReader = new ClassPathApplicationContext("/context.xml");
 		applicationContextSetReader.start();
 		Assertions.assertSame(applicationContext.getBean(UserService.class),
 				applicationContextSetReader.getBean(UserService.class));

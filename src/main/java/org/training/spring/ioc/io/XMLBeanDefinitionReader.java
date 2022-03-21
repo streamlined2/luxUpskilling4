@@ -88,7 +88,7 @@ public class XMLBeanDefinitionReader implements BeanDefinitionReader {
 				if (ref == null) {
 					beanDefinition.getDependencies().put(name, value);
 				} else {
-					beanDefinition.getReferences().put(name, ref);
+					beanDefinition.getRefDependencies().put(name, ref);
 				}
 			}
 

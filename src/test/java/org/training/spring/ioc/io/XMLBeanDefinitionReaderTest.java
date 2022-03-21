@@ -21,12 +21,12 @@ class XMLBeanDefinitionReaderTest {
 		expectedBeanDefinitions.add(BeanDefinition.builder().id("mailService").className("org.training.spring.ioc.service.MailService").build()
 				.addDependency("protocol", "POP3").addDependency("port", "3000"));
 		expectedBeanDefinitions.add(BeanDefinition.builder().id("userService").className("org.training.spring.ioc.service.UserService").build()
-				.addReference("mailService", "mailService"));
+				.addRefDependency("mailService", "mailService"));
 		expectedBeanDefinitions.add(BeanDefinition.builder().id("paymentService").className("org.training.spring.ioc.service.PaymentService")
-				.build().addReference("mailService", "mailService"));
+				.build().addRefDependency("mailService", "mailService"));
 		expectedBeanDefinitions.add(BeanDefinition.builder().id("paymentWithMaxService")
 				.className("org.training.spring.ioc.service.PaymentService").build()
-				.addDependency("maxAmount", "500").addReference("mailService", "mailService"));
+				.addDependency("maxAmount", "500").addRefDependency("mailService", "mailService"));
 	}
 	
 	@Test

@@ -21,15 +21,15 @@ public class BeanDefinition {
 	private String id;
 	private String className;
 	private final Map<String, String> dependencies = new HashMap<>();
-	private final Map<String, String> references = new HashMap<>();
+	private final Map<String, String> refDependencies = new HashMap<>();
 
 	public BeanDefinition addDependency(String name, String value) {
 		dependencies.put(name, value);
 		return this;
 	}
 
-	public BeanDefinition addReference(String name, String value) {
-		references.put(name, value);
+	public BeanDefinition addRefDependency(String name, String value) {
+		refDependencies.put(name, value);
 		return this;
 	}
 

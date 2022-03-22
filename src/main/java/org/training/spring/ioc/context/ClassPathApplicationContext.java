@@ -12,7 +12,6 @@ import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
 import org.training.spring.ioc.exception.NoBeanInContextException;
 import org.training.spring.ioc.exception.NoClassForBeanException;
-import org.training.spring.ioc.exception.NoSuitableBeanException;
 import org.training.spring.ioc.io.BeanDefinitionReader;
 import org.training.spring.ioc.io.XMLBeanDefinitionReader;
 
@@ -53,7 +52,7 @@ public class ClassPathApplicationContext implements ApplicationContext {
 			throw new MultipleBeansForClassException(tooManyBeansMessage);
 		}
 		if (candidates.isEmpty()) {
-			throw new NoSuitableBeanException(noSuitableBeanMessage);
+			throw new NoBeanInContextException(noSuitableBeanMessage);
 		}
 	}
 
@@ -70,6 +69,9 @@ public class ClassPathApplicationContext implements ApplicationContext {
 
 	@Override
 	public <T> T getBean(String name) {
+		if (name == null || name.isBlank()) {
+			throw new IllegalArgumentException("non-blank bean name should be provided");
+		}
 		List<Bean> candidates = beans.values().stream().filter(bean -> bean.getId().equals(name)).toList();
 		checkCandidateBeans(candidates, String.format("more than 1 candidate bean for id %s", name),
 				String.format("no suitable bean found for id %s", name));
@@ -82,13 +84,14 @@ public class ClassPathApplicationContext implements ApplicationContext {
 	}
 
 	private void instantiateAndConfigureBeans(List<BeanDefinition> beanDefinitions) {
-		Set<BeanDefinition> sortedByReferenceCountDefinitions = new TreeSet<>(BeanDefinition.REFERENCE_COUNTER_COMPARATOR);
+		Set<BeanDefinition> sortedByReferenceCountDefinitions = new TreeSet<>(
+				BeanDefinition.REFERENCE_COUNTER_COMPARATOR);
 		sortedByReferenceCountDefinitions.addAll(beanDefinitions);
 		for (var beanDefinition : sortedByReferenceCountDefinitions) {
 			String id = beanDefinition.getId();
 			try {
 				Class<?> cl = Class.forName(beanDefinition.getClassName());
-				Object obj = Inspector.spawnObject(cl);
+				Object obj = Inspector.createObject(cl);
 				setPrimitiveValues(obj, beanDefinition);
 				setReferences(obj, beanDefinition);
 				beans.put(id, new Bean(id, obj));
@@ -112,7 +115,7 @@ public class ClassPathApplicationContext implements ApplicationContext {
 			String property = dependency.getKey();
 			String referencedBeanName = dependency.getValue();
 			Object referencedBean = getBean(referencedBeanName);
-			if(referencedBean == null) {
+			if (referencedBean == null) {
 				throw new NoBeanInContextException(String.format("can't find bean %s in context", referencedBeanName));
 			}
 			Inspector.setPropertyReference(bean, property, referencedBean);

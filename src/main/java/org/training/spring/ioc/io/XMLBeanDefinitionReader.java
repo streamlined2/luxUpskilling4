@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -19,16 +21,16 @@ public class XMLBeanDefinitionReader implements BeanDefinitionReader {
 
 	private static final SAXParserFactory SAX_PARSER_FACTORY = SAXParserFactory.newInstance();
 
-	private List<BeanDefinition> beanDefinitions;
+	private Set<BeanDefinition> beanDefinitions;
 	private List<String> contextFiles;
 
 	public XMLBeanDefinitionReader(String... path) {
 		contextFiles = new ArrayList<>(Arrays.asList(path));
-		beanDefinitions = new ArrayList<>();
+		beanDefinitions = new TreeSet<>(BeanDefinition.REFERENCE_COUNTER_COMPARATOR);
 	}
 
 	@Override
-	public List<BeanDefinition> getBeanDefinitions() {
+	public Set<BeanDefinition> getBeanDefinitions() {
 		try {
 			SAXParser saxParser = SAX_PARSER_FACTORY.newSAXParser();
 			DefaultHandler beanDefinitionHandler = new BeanDefinitionHandler();

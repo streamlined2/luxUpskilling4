@@ -1,5 +1,7 @@
 <beans>
 
+	<bean id="postProcessor" class="org.training.spring.ioc.context.postprocess.PrintBeanFactoryPostProcessor"/>
+
     <bean id="mailService" class="org.training.spring.ioc.service.MailService">
         <property name="protocol" value="POP3"/>
         <property name="port" value="3000"/>
@@ -17,4 +19,5 @@
     <bean id="userService" class="org.training.spring.ioc.service.UserService">
         <property name="mailService" ref="mailService"/>
     </bean>
+
 </beans>

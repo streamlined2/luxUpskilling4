@@ -21,6 +21,7 @@ public class BeanDefinition {
 
 	private String id;
 	private String className;
+	private Class<?> classReference;
 	private final Map<String, String> dependencies = new HashMap<>();
 	private final Map<String, String> refDependencies = new HashMap<>();
 
@@ -32,6 +33,16 @@ public class BeanDefinition {
 	public BeanDefinition addRefDependency(String name, String value) {
 		refDependencies.put(name, value);
 		return this;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("id: ").append(id).append(",").append(" class name: ").append(className).append(", values: ");
+		dependencies.forEach((key, value) -> builder.append(key).append("=").append(value).append(","));
+		builder.append(" references: ");
+		refDependencies.forEach((key, value) -> builder.append(key).append("=").append(value).append(","));
+		return builder.toString();
 	}
 
 	private static class ReferenceCounterComparator implements Comparator<BeanDefinition> {

@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.training.spring.ioc.context.postprocess.BeanFactoryPostProcessor;
+import org.training.spring.ioc.context.postprocess.BeanPostProcessor;
 import org.training.spring.ioc.entity.Bean;
 import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
@@ -23,6 +24,8 @@ public class ClassPathApplicationContext implements ApplicationContext {
 	private static final Predicate<Class<?>> BEAN_FACTORY_POST_PROCESSOR_PREDICATE = BeanFactoryPostProcessor.class::isAssignableFrom;
 	private static final Predicate<BeanDefinition> BEAN_DEFINITION_POST_PROCESSOR_PREDICATE = beanDefinition -> BEAN_FACTORY_POST_PROCESSOR_PREDICATE
 			.test(beanDefinition.getClassReference());
+	private static final Predicate<Object> BEAN_POST_PROCESSOR_PREDICATE = obj -> BeanPostProcessor.class
+			.isAssignableFrom(obj.getClass());
 
 	private Map<String, Bean> beans;
 	private BeanDefinitionReader beanDefinitionReader;
@@ -38,14 +41,34 @@ public class ClassPathApplicationContext implements ApplicationContext {
 		instantiateAndConfigureBeans(beanDefinitions, BEAN_FACTORY_POST_PROCESSOR_PREDICATE);
 		postProcessBeanFactories(beanDefinitions);
 		instantiateAndConfigureBeans(beanDefinitions, BEAN_FACTORY_POST_PROCESSOR_PREDICATE.negate());
+		postProcessBeans();
+	}
+
+	private void postProcessBeans() {
+		beans.values().stream().map(Bean::getValue).filter(BEAN_POST_PROCESSOR_PREDICATE)
+				.map(BeanPostProcessor.class::cast).forEach(this::runBeanPostProcessor);
+	}
+
+	private void runBeanPostProcessor(BeanPostProcessor postProcessor) {
+		beans.values().stream().filter(this::isNotBeanOrFactoryPostProcessor)
+				.forEach(bean -> runPostProcessor(postProcessor, bean));
+	}
+
+	private void runPostProcessor(BeanPostProcessor postProcessor, Bean bean) {
+		postProcessor.postProcessBeforeInitialization(bean.getValue(), bean.getId());
+	}
+
+	private boolean isNotBeanOrFactoryPostProcessor(Bean bean) {
+		return BEAN_POST_PROCESSOR_PREDICATE.negate().test(bean.getValue())
+				&& BEAN_FACTORY_POST_PROCESSOR_PREDICATE.negate().test(bean.getValue().getClass());
 	}
 
 	private void postProcessBeanFactories(Set<BeanDefinition> beanDefinitions) {
-		beans.values().stream()
-				.forEach(bean -> runPostProcessor((BeanFactoryPostProcessor) bean.getValue(), beanDefinitions));
+		beans.values().stream().map(Bean::getValue).map(BeanFactoryPostProcessor.class::cast)
+				.forEach(obj -> runBeanFactoryPostProcessor(obj, beanDefinitions));
 	}
 
-	private void runPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor,
+	private void runBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor,
 			Set<BeanDefinition> beanDefinitions) {
 		beanDefinitions.stream().filter(BEAN_DEFINITION_POST_PROCESSOR_PREDICATE.negate())
 				.forEach(beanFactoryPostProcessor::postProcessBeanFactory);

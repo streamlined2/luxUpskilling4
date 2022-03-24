@@ -1,6 +1,10 @@
 <beans>
 
-	<bean id="postProcessor" class="org.training.spring.ioc.context.postprocess.PrintBeanFactoryPostProcessor"/>
+	<bean id="printBeanFactoryPostProcessor" class="org.training.spring.ioc.context.postprocess.PrintBeanFactoryPostProcessor"/>
+	
+	<bean id="randomValuePostProcessor" class="org.training.spring.ioc.context.postprocess.InjectRandomValueBeanPostProcessor"/>
+	
+	<bean id="randomDoubleValueBean" class="org.training.spring.ioc.bean.RandomDoubleBean"/>
 
     <bean id="mailService" class="org.training.spring.ioc.service.MailService">
         <property name="protocol" value="POP3"/>

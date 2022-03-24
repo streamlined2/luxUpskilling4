@@ -1,9 +1,11 @@
 package org.training.spring.ioc.context.utility;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.training.spring.ioc.exception.NoDefaultConstructorException;
 import org.training.spring.ioc.exception.NoSetterFoundException;
 import org.training.spring.ioc.exception.SetterInvocationException;
@@ -25,6 +27,18 @@ public class Inspector {
 		}
 	}
 
+	public void setPropertyValue(Object obj, String propertyName, Object value) {
+		String setterName = getSetterName(propertyName);
+		try {
+			Class<?> parameterType = getPropertyType(obj, propertyName);
+			Method setter = obj.getClass().getDeclaredMethod(setterName, parameterType);
+			setter.setAccessible(true);
+			setter.invoke(obj, value);
+		} catch (NoSuchMethodException | SecurityException | InvocationTargetException | IllegalAccessException e) {
+			throw new SetterInvocationException(String.format("call to setter %s failed", setterName));
+		}
+	}
+
 	public void setPropertyValue(Object obj, String propertyName, String value) {
 		String setterName = getSetterName(propertyName);
 		try {
@@ -37,7 +51,7 @@ public class Inspector {
 		}
 	}
 
-	private Class<?> getPropertyType(Object obj, String propertyName) {
+	public Class<?> getPropertyType(Object obj, String propertyName) {
 		try {
 			Field property = obj.getClass().getDeclaredField(propertyName);
 			return property.getType();
@@ -99,6 +113,18 @@ public class Inspector {
 
 	private String getSetterName(String propertyName) {
 		return SETTER_PREFIX + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+	}
+
+	public <T, A extends Annotation> Map<String, A> getAnnotatedProperties(Class<T> cl, Class<A> annotationClass) {
+		Map<String, A> annotationMap = new HashMap<>();
+		Field[] fields = cl.getDeclaredFields();
+		for (Field field : fields) {
+			A annotation = field.getAnnotation(annotationClass);
+			if (annotation != null) {
+				annotationMap.put(field.getName(), annotation);
+			}
+		}
+		return annotationMap;
 	}
 
 }

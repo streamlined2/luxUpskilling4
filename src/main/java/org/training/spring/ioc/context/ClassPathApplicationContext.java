@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.training.spring.ioc.context.postprocess.BeanFactoryPostProcessor;
-import org.training.spring.ioc.context.postprocess.BeanPostProcessor;
+import org.training.spring.ioc.context.postprocessor.BeanFactoryPostProcessor;
+import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
 import org.training.spring.ioc.entity.Bean;
 import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
@@ -41,26 +41,48 @@ public class ClassPathApplicationContext implements ApplicationContext {
 		instantiateAndConfigureBeans(beanDefinitions, BEAN_FACTORY_POST_PROCESSOR_PREDICATE);
 		postProcessBeanFactories(beanDefinitions);
 		instantiateAndConfigureBeans(beanDefinitions, BEAN_FACTORY_POST_PROCESSOR_PREDICATE.negate());
-		postProcessBeans();
+		postProcessBeansBeforeInitialization();
+		initializeBeans();
+		postProcessBeansAfterInitialization();
 	}
 
-	private void postProcessBeans() {
+	private void initializeBeans() {
+		// left empty intentionally as primary goal of the exercise is development of
+		// post processor construction skills
+	}
+
+	private void postProcessBeansBeforeInitialization() {
 		beans.values().stream().map(Bean::getValue).filter(BEAN_POST_PROCESSOR_PREDICATE)
-				.map(BeanPostProcessor.class::cast).forEach(this::runBeanPostProcessor);
+				.map(BeanPostProcessor.class::cast).forEach(this::runBeanPostProcessorBeforeInitialization);
 	}
 
-	private void runBeanPostProcessor(BeanPostProcessor postProcessor) {
+	private void runBeanPostProcessorBeforeInitialization(BeanPostProcessor postProcessor) {
 		beans.values().stream().filter(this::isNotBeanOrFactoryPostProcessor)
-				.forEach(bean -> runPostProcessor(postProcessor, bean));
+				.forEach(bean -> runPostProcessorBeforeInitialization(postProcessor, bean));
 	}
 
-	private void runPostProcessor(BeanPostProcessor postProcessor, Bean bean) {
+	private void runPostProcessorBeforeInitialization(BeanPostProcessor postProcessor, Bean bean) {
 		postProcessor.postProcessBeforeInitialization(bean.getValue(), bean.getId());
 	}
 
 	private boolean isNotBeanOrFactoryPostProcessor(Bean bean) {
 		return BEAN_POST_PROCESSOR_PREDICATE.negate().test(bean.getValue())
 				&& BEAN_FACTORY_POST_PROCESSOR_PREDICATE.negate().test(bean.getValue().getClass());
+	}
+
+	private void postProcessBeansAfterInitialization() {
+		beans.values().stream().map(Bean::getValue).filter(BEAN_POST_PROCESSOR_PREDICATE)
+				.map(BeanPostProcessor.class::cast).forEach(this::runBeanPostProcessorAfterInitialization);
+	}
+
+	private void runBeanPostProcessorAfterInitialization(BeanPostProcessor postProcessor) {
+		beans.values().stream().filter(this::isNotBeanOrFactoryPostProcessor)
+				.forEach(bean -> runPostProcessorAfterInitialization(postProcessor, bean));
+	}
+
+	private void runPostProcessorAfterInitialization(BeanPostProcessor postProcessor, Bean bean) {
+		Object newBean = postProcessor.postProcessAfterInitialization(bean.getValue(), bean.getId());
+		bean.setValue(newBean);
 	}
 
 	private void postProcessBeanFactories(Set<BeanDefinition> beanDefinitions) {

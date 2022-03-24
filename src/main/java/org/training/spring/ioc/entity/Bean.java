@@ -1,19 +1,19 @@
 package org.training.spring.ioc.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Builder
-@RequiredArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Bean {
 
 	private final String id;
-	private final Object value;
+	private Object value;
 
 }

@@ -39,6 +39,10 @@ public class Inspector {
 		}
 	}
 
+	private String getSetterName(String propertyName) {
+		return SETTER_PREFIX + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
+	}
+
 	public void setPropertyValue(Object obj, String propertyName, String value) {
 		String setterName = getSetterName(propertyName);
 		try {
@@ -111,10 +115,6 @@ public class Inspector {
 		}
 	}
 
-	private String getSetterName(String propertyName) {
-		return SETTER_PREFIX + propertyName.substring(0, 1).toUpperCase() + propertyName.substring(1);
-	}
-
 	public <T, A extends Annotation> Map<String, A> getAnnotatedProperties(Class<T> cl, Class<A> annotationClass) {
 		Map<String, A> annotationMap = new HashMap<>();
 		Field[] fields = cl.getDeclaredFields();
@@ -125,6 +125,26 @@ public class Inspector {
 			}
 		}
 		return annotationMap;
+	}
+
+	public <T, A extends Annotation> Map<String, A> getAnnotatedMethods(Class<T> cl, Class<A> annotationClass) {
+		Map<String, A> annotationMap = new HashMap<>();
+		Method[] methods = cl.getDeclaredMethods();
+		for (Method method : methods) {
+			A annotation = method.getAnnotation(annotationClass);
+			if (annotation != null) {
+				annotationMap.put(method.getName(), annotation);
+			}
+		}
+		return annotationMap;
+	}
+
+	public Object callMethod(Object obj, Method method, Object... args) {
+		try {
+			return method.invoke(obj, args);
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			throw new SetterInvocationException(String.format("call to method %s failed", method.getName()));
+		}
 	}
 
 }

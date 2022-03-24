@@ -1,13 +1,14 @@
-package org.training.spring.ioc.context.postprocess;
+package org.training.spring.ioc.context.postprocessorbean;
 
 import static org.training.spring.ioc.context.utility.Inspector.getAnnotatedProperties;
+import static org.training.spring.ioc.context.utility.Inspector.getPropertyType;
 import static org.training.spring.ioc.context.utility.Inspector.setPropertyValue;
 
 import java.security.SecureRandom;
 import java.util.random.RandomGenerator;
 
 import org.training.spring.ioc.annotation.RandomValue;
-import org.training.spring.ioc.context.utility.Inspector;
+import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
 
 public class InjectRandomValueBeanPostProcessor implements BeanPostProcessor {
 
@@ -24,7 +25,7 @@ public class InjectRandomValueBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	private void processAnnotatedProperties(Object bean, String propertyName, RandomValue annotation) {
-		Class<?> propertyType = Inspector.getPropertyType(bean, propertyName);
+		Class<?> propertyType = getPropertyType(bean, propertyName);
 		if (Double.class.isAssignableFrom(propertyType) || double.class.isAssignableFrom(propertyType)) {
 			double value = randomGenerator.nextDouble(annotation.min(), annotation.max());
 			setPropertyValue(bean, propertyName, value);

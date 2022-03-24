@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.postprocess;
+package org.training.spring.ioc.context.postprocessor;
 
 import org.training.spring.ioc.entity.BeanDefinition;
 

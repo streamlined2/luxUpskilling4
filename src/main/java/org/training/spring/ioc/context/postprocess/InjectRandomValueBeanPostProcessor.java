@@ -7,6 +7,7 @@ import java.security.SecureRandom;
 import java.util.random.RandomGenerator;
 
 import org.training.spring.ioc.annotation.RandomValue;
+import org.training.spring.ioc.context.utility.Inspector;
 
 public class InjectRandomValueBeanPostProcessor implements BeanPostProcessor {
 
@@ -23,8 +24,22 @@ public class InjectRandomValueBeanPostProcessor implements BeanPostProcessor {
 	}
 
 	private void processAnnotatedProperties(Object bean, String propertyName, RandomValue annotation) {
-		double value = randomGenerator.nextDouble(annotation.min(), annotation.max());
-		setPropertyValue(bean, propertyName, value);
+		Class<?> propertyType = Inspector.getPropertyType(bean, propertyName);
+		if (Double.class.isAssignableFrom(propertyType) || double.class.isAssignableFrom(propertyType)) {
+			double value = randomGenerator.nextDouble(annotation.min(), annotation.max());
+			setPropertyValue(bean, propertyName, value);
+		} else if (String.class.isAssignableFrom(propertyType)) {
+			String value = generateName(annotation.length());
+			setPropertyValue(bean, propertyName, value);
+		}
+	}
+
+	private static String generateName(int nameLength) {
+		var b = new StringBuilder();
+		for (int k = 0; k < nameLength; k++) {
+			b.append((char) ('A' + randomGenerator.nextInt('Z' - 'A' + 1)));
+		}
+		return b.toString();
 	}
 
 }

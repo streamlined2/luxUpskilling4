@@ -6,6 +6,8 @@
 	
 	<bean id="randomDoubleValueBean" class="org.training.spring.ioc.bean.RandomDoubleBean"/>
 
+	<bean id="randomStringValueBean" class="org.training.spring.ioc.bean.RandomStringBean"/>
+
     <bean id="mailService" class="org.training.spring.ioc.service.MailService">
         <property name="protocol" value="POP3"/>
         <property name="port" value="3000"/>

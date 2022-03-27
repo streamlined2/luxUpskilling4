@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.postprocessorbean;
+package org.training.spring.ioc.context.beanpostprocessor;
 
 import static org.training.spring.ioc.context.utility.Inspector.getAnnotatedProperties;
 import static org.training.spring.ioc.context.utility.Inspector.getPropertyType;
@@ -8,7 +8,6 @@ import java.security.SecureRandom;
 import java.util.random.RandomGenerator;
 
 import org.training.spring.ioc.annotation.RandomValue;
-import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
 
 public class InjectRandomValueBeanPostProcessor implements BeanPostProcessor {
 

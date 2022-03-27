@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.training.spring.ioc.context.postprocessor.BeanFactoryPostProcessor;
-import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
+import org.training.spring.ioc.context.beanfactorypostprocessor.BeanFactoryPostProcessor;
+import org.training.spring.ioc.context.beanpostprocessor.BeanPostProcessor;
 import org.training.spring.ioc.entity.Bean;
 import org.training.spring.ioc.entity.BeanDefinition;
 import org.training.spring.ioc.exception.MultipleBeansForClassException;
@@ -106,6 +106,9 @@ public class ClassPathApplicationContext implements ApplicationContext {
 					Object obj = createObject(cl);
 					setValues(obj, beanDefinition);
 					setReferences(obj, beanDefinition);
+					if(obj instanceof InitializingBean initializingBean) {
+						initializingBean.afterPropertiesSet();
+					}
 					beans.put(id, new Bean(id, obj));
 				}
 			} catch (ClassNotFoundException e) {

@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.postprocessor;
+package org.training.spring.ioc.context.beanpostprocessor;
 
 public interface BeanPostProcessor {
 	

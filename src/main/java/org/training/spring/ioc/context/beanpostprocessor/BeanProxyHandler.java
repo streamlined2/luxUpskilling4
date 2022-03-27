@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.postprocessorbean;
+package org.training.spring.ioc.context.beanpostprocessor;
 
 public interface BeanProxyHandler {
 	

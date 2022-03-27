@@ -5,7 +5,7 @@ import org.training.spring.ioc.bean.TaskB;
 import org.training.spring.ioc.context.ApplicationContext;
 import org.training.spring.ioc.context.ClassPathApplicationContext;
 
-public class Tester {
+public class HeavyLoadBeanTester {
 
 	public static void main(String[] args) {
 		ApplicationContext context = new ClassPathApplicationContext("/context.xml");

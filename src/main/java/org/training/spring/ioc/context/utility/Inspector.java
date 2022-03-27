@@ -9,8 +9,10 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.training.spring.ioc.context.postprocessorbean.BeanProxyHandler;
+import org.training.spring.ioc.context.beanpostprocessor.BeanProxyHandler;
+import org.training.spring.ioc.exception.BeanInstantiationException;
 import org.training.spring.ioc.exception.IncorrectProxyHandlerException;
+import org.training.spring.ioc.exception.MethodInvocationException;
 import org.training.spring.ioc.exception.NoDefaultConstructorException;
 import org.training.spring.ioc.exception.NoSetterFoundException;
 import org.training.spring.ioc.exception.SetterInvocationException;
@@ -26,9 +28,18 @@ public class Inspector {
 	public <T> T createObject(Class<T> cl) {
 		try {
 			return cl.getDeclaredConstructor(NO_ARGUMENT_TYPES).newInstance(NO_ARGUMENTS);
-		} catch (ReflectiveOperationException e) {
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
 			throw new NoDefaultConstructorException(
 					String.format("no default constructor found for class %s", cl.getName()));
+		} catch (InstantiationException | InvocationTargetException | IllegalArgumentException e) {
+			e.printStackTrace();
+			throw new MethodInvocationException(
+					String.format("default constructor invocation failed for class %s", cl.getName()));
+		} catch (IllegalAccessException | SecurityException e) {
+			e.printStackTrace();
+			throw new BeanInstantiationException(
+					String.format("access restricted to default constructor of class %s", cl.getName()));
 		}
 	}
 
@@ -40,6 +51,7 @@ public class Inspector {
 			setter.setAccessible(true);
 			setter.invoke(obj, value);
 		} catch (NoSuchMethodException | SecurityException | InvocationTargetException | IllegalAccessException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(String.format("call to setter %s failed", setterName));
 		}
 	}
@@ -55,6 +67,7 @@ public class Inspector {
 			Method setter = obj.getClass().getDeclaredMethod(setterName, parameterType);
 			setValue(obj, setter, parameterType, value);
 		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(
 					String.format("no such method %s in class %s", setterName, obj.getClass().getName()));
 		}
@@ -65,6 +78,7 @@ public class Inspector {
 			Field property = obj.getClass().getDeclaredField(propertyName);
 			return property.getType();
 		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
 			throw new NoSetterFoundException(
 					String.format("can't find property %s in class %s", propertyName, obj.getClass().getName()));
 		}
@@ -96,6 +110,7 @@ public class Inspector {
 						String.format("property %s of unknown type %s", setter.getName(), type.getName()));
 			}
 		} catch (InvocationTargetException | IllegalAccessException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(String.format("call to setter %s failed", setter.getName()));
 		}
 	}
@@ -107,6 +122,7 @@ public class Inspector {
 			Method setter = obj.getClass().getDeclaredMethod(setterName, parameterType);
 			setReference(obj, setter, referencedObject);
 		} catch (NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(
 					String.format("no such method %s in class %s", setterName, obj.getClass().getName()));
 		}
@@ -116,6 +132,7 @@ public class Inspector {
 		try {
 			setter.invoke(obj, referencedBean);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(String.format("can't set reference via setter %s", setter.getName()));
 		}
 	}
@@ -148,6 +165,7 @@ public class Inspector {
 		try {
 			return method.invoke(obj, args);
 		} catch (InvocationTargetException | IllegalAccessException e) {
+			e.printStackTrace();
 			throw new SetterInvocationException(String.format("call to method %s failed", method.getName()));
 		}
 	}

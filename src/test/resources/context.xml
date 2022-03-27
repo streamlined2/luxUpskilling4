@@ -1,16 +1,24 @@
 <beans>
 
-	<bean id="printBeanFactoryPostProcessor" class="org.training.spring.ioc.context.postprocessor.PrintBeanFactoryPostProcessor"/>
+	<bean id="printBeanFactoryPostProcessor" class="org.training.spring.ioc.context.beanfactorypostprocessor.PrintBeanFactoryPostProcessor"/>
 	
-	<bean id="randomValuePostProcessor" class="org.training.spring.ioc.context.postprocessorbean.InjectRandomValueBeanPostProcessor"/>
+	<bean id="propertyPlaceholderBeanFactoryPostProcessor" class="org.training.spring.ioc.context.beanfactorypostprocessor.PropertyPlaceholderBeanFactoryPostProcessor">
+        <property name="propertyFileName" value="src/test/resources/application.properties"/>
+	</bean>
+	
+	<bean id="printerBean" class="org.training.spring.ioc.bean.PrinterBean">
+        <property name="message" value="initial greeting"/>
+	</bean>
+
+	<bean id="randomValuePostProcessor" class="org.training.spring.ioc.context.beanpostprocessor.InjectRandomValueBeanPostProcessor"/>
 	
 	<bean id="randomDoubleValueBean" class="org.training.spring.ioc.bean.RandomDoubleBean"/>
 
 	<bean id="randomStringValueBean" class="org.training.spring.ioc.bean.RandomStringBean"/>
 
-	<bean id="methodExecutionLogPostProcessor" class="org.training.spring.ioc.context.postprocessorbean.MethodExecutionLogBeanPostProcessor"/>
+	<bean id="methodExecutionLogPostProcessor" class="org.training.spring.ioc.context.beanpostprocessor.MethodExecutionLogBeanPostProcessor"/>
 	
-	<bean id="transactionalMethodExecutionPostProcessor" class="org.training.spring.ioc.context.postprocessorbean.TransactionalMethodExecutionBeanPostProcessor"/>
+	<bean id="transactionalMethodExecutionPostProcessor" class="org.training.spring.ioc.context.beanpostprocessor.TransactionalMethodExecutionBeanPostProcessor"/>
 	
 	<bean id="heavyLoadTaskBean" class="org.training.spring.ioc.bean.HeavyLoadTaskBean"/>
 

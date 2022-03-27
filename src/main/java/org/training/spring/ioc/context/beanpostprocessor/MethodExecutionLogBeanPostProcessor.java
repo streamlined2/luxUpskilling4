@@ -1,4 +1,4 @@
-package org.training.spring.ioc.context.postprocessorbean;
+package org.training.spring.ioc.context.beanpostprocessor;
 
 import static org.training.spring.ioc.context.utility.Inspector.callMethod;
 import static org.training.spring.ioc.context.utility.Inspector.getAnnotatedMethods;
@@ -10,7 +10,6 @@ import java.lang.reflect.Proxy;
 import java.util.Map;
 
 import org.training.spring.ioc.annotation.Log;
-import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
 
 public class MethodExecutionLogBeanPostProcessor implements BeanPostProcessor {
 

@@ -3,6 +3,7 @@ package org.training.spring.ioc.bean;
 import java.math.BigInteger;
 
 import org.training.spring.ioc.annotation.Log;
+import org.training.spring.ioc.annotation.Transactional;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -20,6 +21,7 @@ import lombok.ToString;
 public class HeavyLoadTaskBean implements TaskA, TaskB {
 
 	@Log(message = "computation of 1000000 square roots took (msec) ")
+	@Transactional(startMessage = "square roots calculation started", finishMessage = "square roots calculation finished")
 	public double taskA() {
 		double result = 0;
 		for (int k = 2; k < 1000000; k++) {
@@ -29,6 +31,7 @@ public class HeavyLoadTaskBean implements TaskA, TaskB {
 	}
 
 	@Log(message = "calculation of factorial of 500 took (msec) ")
+	@Transactional(startMessage = "factorial calculation started", finishMessage = "factorial calculation finished")
 	public BigInteger taskB() {
 		return factorial(BigInteger.valueOf(500));
 	}

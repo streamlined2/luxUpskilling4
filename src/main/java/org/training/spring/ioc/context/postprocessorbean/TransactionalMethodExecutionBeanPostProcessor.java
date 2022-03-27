@@ -9,39 +9,38 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import org.training.spring.ioc.annotation.Log;
+import org.training.spring.ioc.annotation.Transactional;
 import org.training.spring.ioc.context.postprocessor.BeanPostProcessor;
 
-public class MethodExecutionLogBeanPostProcessor implements BeanPostProcessor {
+public class TransactionalMethodExecutionBeanPostProcessor implements BeanPostProcessor {
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) {
 		Class<?> beanType = bean.getClass();
 		return Proxy.newProxyInstance(beanType.getClassLoader(), beanType.getInterfaces(),
-				new LogInvocationHandler(bean));
+				new TransactionInvocationHandler(bean));
 	}
 
-	private static class LogInvocationHandler implements InvocationHandler, BeanProxyHandler {
+	private static class TransactionInvocationHandler implements InvocationHandler, BeanProxyHandler {
 
 		private final Object bean;
-		private final Map<String, Log> annotationsMap;
+		private final Map<String, Transactional> annotationsMap;
 
-		private LogInvocationHandler(Object bean) {
+		private TransactionInvocationHandler(Object bean) {
 			this.bean = bean;
-			this.annotationsMap = getAnnotatedMethods(getProxiedBean(bean).getClass(), Log.class);
+			this.annotationsMap = getAnnotatedMethods(getProxiedBean(bean).getClass(), Transactional.class);
 		}
 
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			Object value;
-			Log annotation = annotationsMap.get(method.getName());
+			Transactional annotation = annotationsMap.get(method.getName());
 			if (annotation == null) {
 				value = callMethod(bean, method, args);
 			} else {
-				long start = System.currentTimeMillis();
+				System.out.println(annotation.startMessage());
 				value = callMethod(bean, method, args);
-				long time = System.currentTimeMillis() - start;
-				System.out.println(annotation.message() + time);
+				System.out.println(annotation.finishMessage());
 			}
 			return value;
 		}

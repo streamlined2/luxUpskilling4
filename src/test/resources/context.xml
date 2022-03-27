@@ -10,6 +10,8 @@
 
 	<bean id="methodExecutionLogPostProcessor" class="org.training.spring.ioc.context.postprocessorbean.MethodExecutionLogBeanPostProcessor"/>
 	
+	<bean id="transactionalMethodExecutionPostProcessor" class="org.training.spring.ioc.context.postprocessorbean.TransactionalMethodExecutionBeanPostProcessor"/>
+	
 	<bean id="heavyLoadTaskBean" class="org.training.spring.ioc.bean.HeavyLoadTaskBean"/>
 
     <bean id="mailService" class="org.training.spring.ioc.service.MailService">

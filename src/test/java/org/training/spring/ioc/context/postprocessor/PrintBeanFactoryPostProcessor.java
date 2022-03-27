@@ -1,6 +1,5 @@
 package org.training.spring.ioc.context.postprocessor;
 
-import org.training.spring.ioc.context.postprocessor.BeanFactoryPostProcessor;
 import org.training.spring.ioc.entity.BeanDefinition;
 
 public class PrintBeanFactoryPostProcessor implements BeanFactoryPostProcessor {

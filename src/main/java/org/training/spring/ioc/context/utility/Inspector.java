@@ -2,10 +2,15 @@ package org.training.spring.ioc.context.utility;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.training.spring.ioc.context.postprocessorbean.BeanProxyHandler;
+import org.training.spring.ioc.exception.IncorrectProxyHandlerException;
 import org.training.spring.ioc.exception.NoDefaultConstructorException;
 import org.training.spring.ioc.exception.NoSetterFoundException;
 import org.training.spring.ioc.exception.SetterInvocationException;
@@ -145,6 +150,20 @@ public class Inspector {
 		} catch (InvocationTargetException | IllegalAccessException e) {
 			throw new SetterInvocationException(String.format("call to method %s failed", method.getName()));
 		}
+	}
+
+	public Object getProxiedBean(Object obj) {
+		Object bean = obj;
+		while (bean instanceof Proxy proxy) {
+			InvocationHandler handler = Proxy.getInvocationHandler(proxy);
+			if (handler instanceof BeanProxyHandler beanHandler) {
+				bean = beanHandler.getBean();
+			} else {
+				throw new IncorrectProxyHandlerException(
+						"proxy invocation handler should implement BeanProxyHandler interface");
+			}
+		}
+		return bean;
 	}
 
 }

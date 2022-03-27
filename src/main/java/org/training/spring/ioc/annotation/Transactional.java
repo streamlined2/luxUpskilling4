@@ -8,8 +8,9 @@ import java.lang.annotation.Target;
 
 @Retention(RUNTIME)
 @Target(METHOD)
-public @interface Log {
-	
-	String message() default "";
+public @interface Transactional {
+
+	String startMessage() default "transaction started";
+	String finishMessage() default "transaction finished";
 	
 }

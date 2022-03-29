@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Map;
 import java.util.Properties;
 
 import org.training.spring.ioc.bean.Printer;
@@ -19,7 +18,8 @@ import lombok.Setter;
 @Setter
 public class PropertyPlaceholderBeanFactoryPostProcessor implements BeanFactoryPostProcessor, InitializingBean {
 
-	private static final String MESSAGE_KEY = "message";
+	private static final String KEY_PREFIX = "${";
+	private static final String KEY_SUFFIX = "}";
 
 	private String propertyFileName;
 	private Properties properties;
@@ -38,10 +38,18 @@ public class PropertyPlaceholderBeanFactoryPostProcessor implements BeanFactoryP
 	@Override
 	public void postProcessBeanFactory(BeanDefinition beanDefinition) {
 		if (Printer.class.isAssignableFrom(beanDefinition.getClassReference())) {
-			Map<String, String> map = beanDefinition.getDependencies();
-			String message = properties.getProperty(MESSAGE_KEY);
-			if (message != null) {
-				map.put(MESSAGE_KEY, message);
+			var valueMap = beanDefinition.getDependencies();
+			for (var entry : valueMap.entrySet()) {
+				String property = entry.getKey();
+				String placeholder = entry.getValue();
+				if (placeholder.startsWith(KEY_PREFIX) && placeholder.endsWith(KEY_SUFFIX)) {
+					String propertyKey = placeholder
+							.substring(KEY_PREFIX.length(), placeholder.length() - KEY_SUFFIX.length()).trim();
+					String value = properties.getProperty(propertyKey);
+					if (value != null) {
+						valueMap.put(property, value);
+					}
+				}
 			}
 		}
 	}

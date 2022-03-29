@@ -7,7 +7,9 @@
 	</bean>
 	
 	<bean id="printerBean" class="org.training.spring.ioc.bean.PrinterBean">
-        <property name="message" value="initial greeting"/>
+        <property name="message" value="${message}"/>
+        <property name="greeting" value="${greeting}"/>
+        <property name="name" value="${name}"/>
 	</bean>
 
 	<bean id="randomValuePostProcessor" class="org.training.spring.ioc.context.beanpostprocessor.InjectRandomValueBeanPostProcessor"/>

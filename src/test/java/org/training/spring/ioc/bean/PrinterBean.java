@@ -15,11 +15,13 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class PrinterBean implements Printer {
 
+	private String name;
+	private String greeting;
 	private String message;
 
 	@Override
 	public void print() {
-		System.out.println(message);
+		System.out.format("%s, %s %s%n", name, greeting, message);
 	}
 
 }
